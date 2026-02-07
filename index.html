@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trade Record Generator | Sutton Group</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #CC0000;
+            --primary-dark: #990000;
+            --bg: #FAFAFA;
+            --card-bg: #FFFFFF;
+            --text: #1A1A1A;
+            --text-muted: #666666;
+            --border: #E5E5E5;
+            --success: #10B981;
+            --warning: #F59E0B;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            border-bottom: 3px solid var(--primary);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1.125rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid var(--border);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .transaction-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .transaction-btn {
+            padding: 1.5rem;
+            border: 2px solid var(--border);
+            background: white;
+            border-radius: 8px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .transaction-btn:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .transaction-btn.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg);
+        }
+
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--primary);
+            background: #FFF5F5;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 1.5rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-item-name {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(204, 0, 0, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-size: 0.875rem;
+        }
+
+        input, textarea {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.1);
+        }
+
+        .status {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status.success {
+            background: #ECFDF5;
+            color: #065F46;
+            border: 1px solid #10B981;
+        }
+
+        .status.error {
+            background: #FEF2F2;
+            color: #991B1B;
+            border: 1px solid #DC2626;
+        }
+
+        .status.info {
+            background: #EFF6FF;
+            color: #1E40AF;
+            border: 1px solid: #3B82F6;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(204, 0, 0, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 0 2rem;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .transaction-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Trade Record Generator</h1>
+            <p class="subtitle">Sutton Group Realty Systems Inc. Brokerage</p>
+        </header>
+
+        <!-- Transaction Type Selection -->
+        <div class="card">
+            <h2 class="card-title">1. Select Transaction Type</h2>
+            <div class="transaction-selector">
+                <button class="transaction-btn" id="sellerBtn" onclick="selectTransaction('seller')">
+                    🏠 Seller
+                </button>
+                <button class="transaction-btn" id="buyerBtn" onclick="selectTransaction('buyer')">
+                    🔑 Buyer
+                </button>
+            </div>
+        </div>
+
+        <!-- File Upload -->
+        <div class="card">
+            <h2 class="card-title">2. Upload Documents</h2>
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">📄</div>
+                <p><strong>Click to upload</strong> or drag and drop</p>
+                <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">
+                    PDF, DOC, DOCX (Max 10MB per file)
+                </p>
+            </div>
+            <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx" onchange="handleFiles(this.files)">
+            <div class="file-list" id="fileList"></div>
+
+            <div class="actions">
+                <button class="btn btn-primary" id="extractBtn" onclick="extractData()" disabled>
+                    <span class="loading hidden" id="extractLoading"></span>
+                    🤖 Extract Data with AI
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="statusContainer"></div>
+
+        <!-- Extracted Data Form -->
+        <div class="card hidden" id="dataCard">
+            <h2 class="card-title">3. Review & Edit Extracted Data</h2>
+            <form id="tradeForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>MLS Number</label>
+                        <input type="text" name="mlsNumber" id="mlsNumber">
+                    </div>
+                    <div class="form-group">
+                        <label>Property Address</label>
+                        <input type="text" name="propertyAddress" id="propertyAddress">
+                    </div>
+                    <div class="form-group">
+                        <label>Vendor (Seller)</label>
+                        <input type="text" name="vendor" id="vendor">
+                    </div>
+                    <div class="form-group">
+                        <label>Purchaser (Buyer)</label>
+                        <input type="text" name="purchaser" id="purchaser">
+                    </div>
+                    <div class="form-group">
+                        <label>Client Birthdate *</label>
+                        <input type="text" name="clientBirthdate" id="clientBirthdate" placeholder="MM/DD/YYYY">
+                    </div>
+                    <div class="form-group">
+                        <label>Client Email</label>
+                        <input type="email" name="clientEmail" id="clientEmail">
+                    </div>
+                    <div class="form-group">
+                        <label>Sale Price</label>
+                        <input type="text" name="salePrice" id="salePrice">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Commission %</label>
+                        <input type="text" name="totalCommissionPercent" id="totalCommissionPercent">
+                    </div>
+                    <div class="form-group">
+                        <label>Closing Date</label>
+                        <input type="text" name="closingDate" id="closingDate">
+                    </div>
+                    <div class="form-group">
+                        <label>Sutton Agent</label>
+                        <input type="text" name="suttonAgentName" id="suttonAgentName">
+                    </div>
+                    <div class="form-group">
+                        <label>Other Agent</label>
+                        <input type="text" name="otherAgentName" id="otherAgentName">
+                    </div>
+                    <div class="form-group">
+                        <label>Other Brokerage</label>
+                        <input type="text" name="otherBrokerage" id="otherBrokerage">
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Seller's Solicitor</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="sellerSolicitorName" id="sellerSolicitorName">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" name="sellerSolicitorPhone" id="sellerSolicitorPhone">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="sellerSolicitorEmail" id="sellerSolicitorEmail">
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Buyer's Solicitor</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input type="text" name="buyerSolicitorName" id="buyerSolicitorName">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" name="buyerSolicitorPhone" id="buyerSolicitorPhone">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" name="buyerSolicitorEmail" id="buyerSolicitorEmail">
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn btn-primary" onclick="generateDocx()">
+                        📄 Generate Trade Record DOCX
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="submitTrade()">
+                        📧 Submit Complete Package
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <footer>
+            <p>Trade Record Generator v2.0 | Powered by AI</p>
+            <p style="margin-top: 0.5rem;">Sutton Group Realty Systems Inc. Brokerage</p>
+        </footer>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://trade-backend-nine.vercel.app';
+        let transactionType = '';
+        let uploadedFiles = [];
+
+        function selectTransaction(type) {
+            transactionType = type;
+            document.getElementById('sellerBtn').classList.toggle('active', type === 'seller');
+            document.getElementById('buyerBtn').classList.toggle('active', type === 'buyer');
+            updateExtractButton();
+        }
+
+        function handleFiles(files) {
+            uploadedFiles = Array.from(files);
+            displayFileList();
+            updateExtractButton();
+        }
+
+        function displayFileList() {
+            const fileList = document.getElementById('fileList');
+            if (uploadedFiles.length === 0) {
+                fileList.innerHTML = '';
+                return;
+            }
+
+            fileList.innerHTML = uploadedFiles.map((file, index) => `
+                <div class="file-item">
+                    <span class="file-item-name">📎 ${file.name}</span>
+                    <button class="remove-file" onclick="removeFile(${index})" type="button">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            displayFileList();
+            updateExtractButton();
+        }
+
+        function updateExtractButton() {
+            const btn = document.getElementById('extractBtn');
+            btn.disabled = !transactionType || uploadedFiles.length === 0;
+        }
+
+        function showStatus(message, type = 'info') {
+            const container = document.getElementById('statusContainer');
+            container.innerHTML = `
+                <div class="status ${type}">
+                    ${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'} ${message}
+                </div>
+            `;
+        }
+
+        function clearStatus() {
+            document.getElementById('statusContainer').innerHTML = '';
+        }
+
+        async function extractData() {
+            const btn = document.getElementById('extractBtn');
+            const loading = document.getElementById('extractLoading');
+            
+            btn.disabled = true;
+            loading.classList.remove('hidden');
+            showStatus('🤖 AI is analyzing your documents...', 'info');
+
+            try {
+                // Convert files to base64
+                const filesData = await Promise.all(uploadedFiles.map(async (file) => {
+                    const base64 = await fileToBase64(file);
+                    return {
+                        name: file.name,
+                        data: base64.split(',')[1] // Remove data:image/png;base64, prefix
+                    };
+                }));
+
+                const response = await fetch(`${BACKEND_URL}/api/extract`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        files: filesData,
+                        transactionType
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success && result.results.length > 0) {
+                    // Merge data from all files
+                    const mergedData = result.results.reduce((acc, r) => {
+                        if (r.success && r.data) {
+                            return { ...acc, ...r.data };
+                        }
+                        return acc;
+                    }, {});
+
+                    populateForm(mergedData);
+                    document.getElementById('dataCard').classList.remove('hidden');
+                    showStatus('✅ Data extracted successfully! Review and edit below.', 'success');
+                } else {
+                    showStatus('⚠️ Could not extract data. Please fill manually.', 'error');
+                    document.getElementById('dataCard').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Extraction error:', error);
+                showStatus('❌ Extraction failed. Please fill manually.', 'error');
+                document.getElementById('dataCard').classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('hidden');
+            }
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        function populateForm(data) {
+            Object.keys(data).forEach(key => {
+                const input = document.getElementById(key);
+                if (input && data[key]) {
+                    input.value = data[key];
+                }
+            });
+        }
+
+        async function generateDocx() {
+            showStatus('📄 Generating Trade Record DOCX...', 'info');
+
+            try {
+                const formData = getFormData();
+                
+                const response = await fetch(`${BACKEND_URL}/api/generate-docx`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Trade_Record_${formData.propertyAddress || 'Sheet'}.docx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    showStatus('✅ Trade Record DOCX downloaded! Review it before submitting.', 'success');
+                } else {
+                    showStatus('❌ Failed to generate DOCX.', 'error');
+                }
+            } catch (error) {
+                console.error('DOCX generation error:', error);
+                showStatus('❌ DOCX generation failed.', 'error');
+            }
+        }
+
+        function getFormData() {
+            const form = document.getElementById('tradeForm');
+            const data = {};
+            new FormData(form).forEach((value, key) => {
+                data[key] = value;
+            });
+            return data;
+        }
+
+        async function submitTrade() {
+            showStatus('📧 Submitting trade package...', 'info');
+
+            try {
+                const formData = new FormData();
+                
+                // Add form fields
+                Object.entries(getFormData()).forEach(([key, value]) => {
+                    formData.append(key, value);
+                });
+
+                // Add files
+                uploadedFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+
+                formData.append('transactionType', transactionType);
+
+                const response = await fetch(`${BACKEND_URL}/api/submit`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('✅ Trade submitted successfully! Check your email.', 'success');
+                } else {
+                    showStatus('❌ Submission failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                showStatus('❌ Submission failed. Please try again.', 'error');
+            }
+        }
+
+        // Drag and drop
+        const uploadZone = document.getElementById('uploadZone');
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+    </script>
+</body>
+</html>
